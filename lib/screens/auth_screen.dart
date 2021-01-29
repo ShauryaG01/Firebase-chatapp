@@ -3,7 +3,7 @@ import 'package:firebase_app/widgets/auth/auth_form.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+final _firestore  = Firestore.instance;
 class AuthScreen extends StatefulWidget {
   @override
   _AuthScreenState createState() => _AuthScreenState();

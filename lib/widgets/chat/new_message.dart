@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+final _firestore  = FirebaseFirestore.instance;
+User loggedinuser;
 
 class NewMessage extends StatefulWidget {
   @override
@@ -13,20 +15,42 @@ class _NewMessageState extends State<NewMessage> {
   var _controller = new TextEditingController();
 
   void sendMessage() async {
-    FocusScope.of(context).unfocus();
-    final user = await FirebaseAuth.instance.currentUser;
-    print(user.uid);
-    FirebaseFirestore.instance.collection('chat').add({
-      'text': _enteredMssg,
-      'createdAt': Timestamp.now(),
-      'userId': user.uid,
-    });
-    // print(user.uid);
-    _controller.clear();
-    _enteredMssg = '';
-  }
+    if(loggedinuser!=null)
+      {
+        if(_enteredMssg == '')return;
+        FocusScope.of(context).unfocus();
+        FirebaseFirestore.instance.collection('chat').add({
+          'text': _enteredMssg,
+          'createdAt': Timestamp.now(),
+          'userId': loggedinuser.uid,
+        });
+        // print(user.uid);
+        _controller.clear();
+        _enteredMssg = '';
 
+      }
+
+  }
+  final _auth = FirebaseAuth.instance;
   @override
+  void initState() {
+    getdata();
+
+    super.initState();
+  }
+  void getdata() async {
+    try{
+      final user = await _auth.currentUser;
+      if(user!=null)
+      {
+        loggedinuser = user;
+        print(loggedinuser.email);
+      }
+    }catch(e)
+    {
+      print(e);
+    }
+  }
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(
@@ -47,7 +71,7 @@ class _NewMessageState extends State<NewMessage> {
           IconButton(
               icon: Icon(Icons.send),
               color: Theme.of(context).accentColor,
-              onPressed: _enteredMssg.trim().isEmpty ? null : sendMessage)
+              onPressed:  sendMessage)
         ],
       ),
     );
